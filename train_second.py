@@ -260,12 +260,13 @@ def main(config_path):
         for i, batch in enumerate(train_dataloader):
             waves = batch[0]
             batch = [b.to(device) for b in batch[1:]]
-            texts, input_lengths, ref_texts, ref_lengths, mels, mel_input_length, ref_mels = batch
+            texts, input_lengths, ref_texts, ref_lengths, mels, mel_input_length, ref_mels, bert_tokens, bert_lengths = batch
 
             with torch.no_grad():
                 mask = length_to_mask(mel_input_length // (2 ** n_down)).to(device)
                 mel_mask = length_to_mask(mel_input_length).to(device)
                 text_mask = length_to_mask(input_lengths).to(texts.device)
+                bert_mask = length_to_mask(bert_lengths).to(bert_tokens.device)
 
                 try:
                     _, _, s2s_attn = model.text_aligner(mels, mask, texts)
@@ -306,7 +307,9 @@ def main(config_path):
             gs = torch.stack(gs).squeeze() # global acoustic styles
             s_trg = torch.cat([gs, s_dur], dim=-1).detach() # ground truth for denoiser
 
-            bert_dur = model.bert(texts, attention_mask=(~text_mask).int())
+            # Use BERT-tokenized Bengali text for duration predictor
+            bert_attn_mask = (~bert_mask).int()
+            bert_dur = model.bert(bert_tokens, attention_mask=bert_attn_mask)
             d_en = model.bert_encoder(bert_dur).transpose(-1, -2) 
             
             # denoiser training
@@ -574,7 +577,7 @@ def main(config_path):
                 try:
                     waves = batch[0]
                     batch = [b.to(device) for b in batch[1:]]
-                    texts, input_lengths, ref_texts, ref_lengths, mels, mel_input_length, ref_mels = batch
+                    texts, input_lengths, ref_texts, ref_lengths, mels, mel_input_length, ref_mels, bert_tokens, bert_lengths = batch
                     with torch.no_grad():
                         mask = length_to_mask(mel_input_length // (2 ** n_down)).to('cuda')
                         text_mask = length_to_mask(input_lengths).to(texts.device)
@@ -608,7 +611,10 @@ def main(config_path):
                     gs = torch.stack(gs).squeeze()
                     s_trg = torch.cat([s, gs], dim=-1).detach()
 
-                    bert_dur = model.bert(texts, attention_mask=(~text_mask).int())
+                    # Use BERT-tokenized Bengali text for duration predictor
+                    bert_mask = length_to_mask(bert_lengths).to(bert_tokens.device)
+                    bert_attn_mask = (~bert_mask).int()
+                    bert_dur = model.bert(bert_tokens, attention_mask=bert_attn_mask)
                     d_en = model.bert_encoder(bert_dur).transpose(-1, -2) 
                     d, p = model.predictor(d_en, s, 
                                                         input_lengths, 

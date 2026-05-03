@@ -1,21 +1,81 @@
 import os
 import yaml
 import torch
-from transformers import AlbertConfig, AlbertModel
+from transformers import AutoModel, AutoConfig
 
-class CustomAlbert(AlbertModel):
-    def forward(self, *args, **kwargs):
-        # Call the original forward method
-        outputs = super().forward(*args, **kwargs)
 
-        # Only return the last_hidden_state
+class BengaliBERT(torch.nn.Module):
+    """
+    Wrapper around a HuggingFace Bengali BERT model to match the PL-BERT interface.
+    
+    The original PL-BERT was a custom ALBERT model trained on English phoneme MLM.
+    This replaces it with a pretrained Bengali BERT that understands Bengali text
+    semantics, providing meaningful embeddings for the duration predictor and 
+    style diffusion model.
+    
+    The forward() method returns only last_hidden_state to match CustomAlbert behavior.
+    """
+    def __init__(self, model_name='sagorsarker/bangla-bert-base'):
+        super().__init__()
+        self.bert = AutoModel.from_pretrained(model_name)
+        self.config = self.bert.config
+        
+    def forward(self, input_ids, attention_mask=None, **kwargs):
+        """
+        Args:
+            input_ids: [B, T] token IDs from BERT tokenizer
+            attention_mask: [B, T] attention mask (1 = attend, 0 = pad)
+        
+        Returns:
+            last_hidden_state: [B, T, hidden_size] contextual embeddings
+        """
+        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
         return outputs.last_hidden_state
 
 
-def load_plbert(log_dir):
-    config_path = os.path.join(log_dir, "config.yml")
-    plbert_config = yaml.safe_load(open(config_path))
+def load_plbert(log_dir_or_model_name):
+    """
+    Load a BERT model for StyleTTS2.
     
+    For Bengali: pass a HuggingFace model name like 'sagorsarker/bangla-bert-base'.
+    For English (legacy): pass the local PL-BERT directory path containing config.yml
+                          and step_*.t7 checkpoint files.
+    
+    Args:
+        log_dir_or_model_name: Either a HuggingFace model name/path or a local
+                               directory containing PL-BERT config.yml + checkpoint.
+    
+    Returns:
+        A BERT model instance with .config attribute and forward() returning
+        last_hidden_state [B, T, hidden_size].
+    """
+    # Check if it's a local PL-BERT directory (legacy English mode)
+    config_path = os.path.join(log_dir_or_model_name, "config.yml")
+    if os.path.isdir(log_dir_or_model_name) and os.path.exists(config_path):
+        # Legacy mode: load custom ALBERT from local checkpoint
+        return _load_legacy_plbert(log_dir_or_model_name, config_path)
+    
+    # HuggingFace mode: load Bengali BERT (or any HF model)
+    print(f"Loading Bengali BERT from HuggingFace: {log_dir_or_model_name}")
+    model = BengaliBERT(model_name=log_dir_or_model_name)
+    print(f"  hidden_size={model.config.hidden_size}, "
+          f"max_position_embeddings={model.config.max_position_embeddings}")
+    return model
+
+
+def _load_legacy_plbert(log_dir, config_path):
+    """
+    Load the original English PL-BERT from a local directory.
+    Kept for backward compatibility.
+    """
+    from transformers import AlbertConfig, AlbertModel
+    
+    class CustomAlbert(AlbertModel):
+        def forward(self, *args, **kwargs):
+            outputs = super().forward(*args, **kwargs)
+            return outputs.last_hidden_state
+
+    plbert_config = yaml.safe_load(open(config_path))
     albert_base_configuration = AlbertConfig(**plbert_config['model_params'])
     bert = CustomAlbert(albert_base_configuration)
 

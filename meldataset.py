@@ -19,14 +19,19 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 import pandas as pd
+from transformers import AutoTokenizer
 
 _pad = "$"
 _punctuation = ';:,.!?¡¿—…"«»“” '
+# Bengali Unicode range (U+0980 to U+09FF) for Bengali script support
+_letters_bengali = ''.join([chr(c) for c in range(0x0980, 0x09FF + 1)])
 _letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 _letters_ipa = "ɑɐɒæɓʙβɔɕçɗɖðʤəɘɚɛɜɝɞɟʄɡɠɢʛɦɧħɥʜɨɪʝɭɬɫɮʟɱɯɰŋɳɲɴøɵɸθœɶʘɹɺɾɻʀʁɽʂʃʈʧʉʊʋⱱʌɣɤʍχʎʏʑʐʒʔʡʕʢǀǁǂǃˈˌːˑʼʴʰʱʲʷˠˤ˞↓↑→↗↘'̩'ᵻ"
+# Add Combining Diacritical Marks block (U+0300 - U+036F) for nasalization and tones
+_letters_ipa += ''.join([chr(c) for c in range(0x0300, 0x036F + 1)])
 
 # Export all symbols:
-symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_ipa)
+symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_bengali) + list(_letters_ipa)
 
 dicts = {}
 for i in range(len((symbols))):
@@ -41,7 +46,7 @@ class TextCleaner:
             try:
                 indexes.append(self.word_index_dictionary[char])
             except KeyError:
-                print(text)
+                print(f"Unknown symbol found: {char.encode('unicode_escape')}")
         return indexes
 
 np.random.seed(1)
@@ -74,13 +79,15 @@ class FilePathDataset(torch.utils.data.Dataset):
                  validation=False,
                  OOD_data="Data/OOD_texts.txt",
                  min_length=50,
+                 bert_model_name='sagorsarker/bangla-bert-base',
                  ):
 
         spect_params = SPECT_PARAMS
         mel_params = MEL_PARAMS
 
         _data_list = [l.strip().split('|') for l in data_list]
-        self.data_list = [data if len(data) == 3 else (*data, 0) for data in _data_list]
+        # Format: wavpath|phonemized_text|speaker_id  OR  wavpath|phonemized_text|speaker_id|raw_bengali_text
+        self.data_list = [data if len(data) >= 3 else (*data, 0) for data in _data_list]
         self.text_cleaner = TextCleaner()
         self.sr = sr
 
@@ -99,6 +106,15 @@ class FilePathDataset(torch.utils.data.Dataset):
         self.ptexts = [t.split('|')[idx] for t in tl]
         
         self.root_path = root_path
+        
+        # Bengali BERT tokenizer for duration predictor input
+        # This tokenizes raw Bengali text into BERT wordpiece tokens
+        try:
+            self.bert_tokenizer = AutoTokenizer.from_pretrained(bert_model_name)
+        except Exception as e:
+            print(f"WARNING: Could not load BERT tokenizer '{bert_model_name}': {e}")
+            print("Falling back to phoneme-only mode (BERT will receive phoneme IDs)")
+            self.bert_tokenizer = None
 
     def __len__(self):
         return len(self.data_list)
@@ -107,7 +123,7 @@ class FilePathDataset(torch.utils.data.Dataset):
         data = self.data_list[idx]
         path = data[0]
         
-        wave, text_tensor, speaker_id = self._load_tensor(data)
+        wave, text_tensor, speaker_id, bert_tokens = self._load_tensor(data)
         
         mel_tensor = preprocess(wave).squeeze()
         
@@ -133,11 +149,15 @@ class FilePathDataset(torch.utils.data.Dataset):
 
             ref_text = torch.LongTensor(text)
         
-        return speaker_id, acoustic_feature, text_tensor, ref_text, ref_mel_tensor, ref_label, path, wave
+        return speaker_id, acoustic_feature, text_tensor, ref_text, ref_mel_tensor, ref_label, path, wave, bert_tokens
 
     def _load_tensor(self, data):
-        wave_path, text, speaker_id = data
-        speaker_id = int(speaker_id)
+        wave_path = data[0]
+        text = data[1]
+        speaker_id = int(data[2])
+        # Optional 4th column: raw Bengali text for BERT tokenization
+        raw_bengali_text = data[3] if len(data) > 3 else None
+        
         wave, sr = sf.read(osp.join(self.root_path, wave_path))
         if wave.shape[-1] == 2:
             wave = wave[:, 0].squeeze()
@@ -147,17 +167,32 @@ class FilePathDataset(torch.utils.data.Dataset):
             
         wave = np.concatenate([np.zeros([5000]), wave, np.zeros([5000])], axis=0)
         
-        text = self.text_cleaner(text)
+        # Phoneme IDs for text encoder / aligner
+        phoneme_ids = self.text_cleaner(text)
+        phoneme_ids.insert(0, 0)
+        phoneme_ids.append(0)
+        text_tensor = torch.LongTensor(phoneme_ids)
         
-        text.insert(0, 0)
-        text.append(0)
-        
-        text = torch.LongTensor(text)
+        # BERT tokens for duration predictor
+        # If raw Bengali text is available, tokenize it; otherwise use phoneme text
+        if self.bert_tokenizer is not None:
+            bert_input = raw_bengali_text if raw_bengali_text else text
+            bert_encoded = self.bert_tokenizer(
+                bert_input,
+                return_tensors='pt',
+                padding=False,
+                truncation=True,
+                max_length=512
+            )
+            bert_tokens = bert_encoded['input_ids'].squeeze(0)  # [seq_len]
+        else:
+            # Fallback: use phoneme IDs (same as original behavior)
+            bert_tokens = text_tensor.clone()
 
-        return wave, text, speaker_id
+        return wave, text_tensor, speaker_id, bert_tokens
 
     def _load_data(self, data):
-        wave, text_tensor, speaker_id = self._load_tensor(data)
+        wave, text_tensor, speaker_id, bert_tokens = self._load_tensor(data)
         mel_tensor = preprocess(wave).squeeze()
 
         mel_length = mel_tensor.size(1)
@@ -194,30 +229,36 @@ class Collater(object):
         max_mel_length = max([b[1].shape[1] for b in batch])
         max_text_length = max([b[2].shape[0] for b in batch])
         max_rtext_length = max([b[3].shape[0] for b in batch])
+        max_bert_length = max([b[8].shape[0] for b in batch])
 
         labels = torch.zeros((batch_size)).long()
         mels = torch.zeros((batch_size, nmels, max_mel_length)).float()
         texts = torch.zeros((batch_size, max_text_length)).long()
         ref_texts = torch.zeros((batch_size, max_rtext_length)).long()
+        bert_tokens = torch.zeros((batch_size, max_bert_length)).long()
 
         input_lengths = torch.zeros(batch_size).long()
         ref_lengths = torch.zeros(batch_size).long()
         output_lengths = torch.zeros(batch_size).long()
+        bert_lengths = torch.zeros(batch_size).long()
         ref_mels = torch.zeros((batch_size, nmels, self.max_mel_length)).float()
         ref_labels = torch.zeros((batch_size)).long()
         paths = ['' for _ in range(batch_size)]
         waves = [None for _ in range(batch_size)]
         
-        for bid, (label, mel, text, ref_text, ref_mel, ref_label, path, wave) in enumerate(batch):
+        for bid, (label, mel, text, ref_text, ref_mel, ref_label, path, wave, bert_tok) in enumerate(batch):
             mel_size = mel.size(1)
             text_size = text.size(0)
             rtext_size = ref_text.size(0)
+            bert_size = bert_tok.size(0)
             labels[bid] = label
             mels[bid, :, :mel_size] = mel
             texts[bid, :text_size] = text
             ref_texts[bid, :rtext_size] = ref_text
+            bert_tokens[bid, :bert_size] = bert_tok
             input_lengths[bid] = text_size
             ref_lengths[bid] = rtext_size
+            bert_lengths[bid] = bert_size
             output_lengths[bid] = mel_size
             paths[bid] = path
             ref_mel_size = ref_mel.size(1)
@@ -226,7 +267,7 @@ class Collater(object):
             ref_labels[bid] = ref_label
             waves[bid] = wave
 
-        return waves, texts, input_lengths, ref_texts, ref_lengths, mels, output_lengths, ref_mels
+        return waves, texts, input_lengths, ref_texts, ref_lengths, mels, output_lengths, ref_mels, bert_tokens, bert_lengths
 
 
 

@@ -1,0 +1,50 @@
+Data/wavs/bn_0950.wav|ʃomudɾɔtɔʈ die ɡʰeɾa ʃobuɟɔnil dbipɔʈi modʰutʃɔndɾima dʒapɔneɾ ʃɔɾɡɔ|0
+Data/wavs/bn_0951.wav|lek ɡaɾɖenʃɔ laɡoa ɾelɔbɔstiɾ ekadʰik duʃkɾitiɾ upɔɾeo,puliʃ nɔɟɔɾ ɾakʰɔtʃʰe|0
+Data/wavs/bn_0952.wav|mɔnɖɔpɔʃɔɟɟaɾ daitbɔ nietʃʰen ɟatijo puɾɔʃkaɾɔpɾapto paʈɔʃilpi,ɡowɾaŋɡɔ kuilla|0
+Data/wavs/bn_0953.wav|ʃei tʃitɾɔkɔlai mɔnɖɔp ʃɔɟɟajo bæbɔhɾito hɔtʃtʃʰe,puɾbɔ kɔlɔkataɾ kãkuɾɔɡatʃʰi ijɔŋʃʈaɾeɾ puɟojo|0
+Data/wavs/bn_0954.wav|onuʃʈʰane tʃʰil ɡan,ebɔŋ ʃunito obʰinito,bibʰinnɔ naʈɔkeɾ,klipiŋʃɔ dekʰanoɾ bæbɔstʰa|0
+Data/wavs/bn_0955.wav|kaʃmiɾeɾ ek pɾatʃin bowddʰɔ stup haɟiɾ,ɾamɔkanai odʰikaɾi leneɾ,umeʃ ʃmɾiti ʃɔŋɡʰe|0
+Data/wavs/bn_0956.wav|udbiɡnɔ biʃbɔbidælɔjo, ei nie anɖaɾɔɡɾæɟueʈ kaunʃile biʃɔd alotʃɔna kɔɾe|0
+Data/wavs/bn_0957.wav|tʃokʰe aɡun, ʈʰõʈe haʃi, komɔl kɔʈʰoɾeɾ ek, opuɾbɔ ʃɔŋsleʃ|0
+Data/wavs/bn_0958.wav|mɔdʰːɔ haor.aɾ lɔkʰkʰɔn daʃ leneɾ baɡbadini bæam ʃomitiɾ, obʰinɔbɔtbɔ pɾotimajo|0
+Data/wavs/bn_0959.wav|meeɾa ʈʰõʈ ulʈe ɔpɔtʃʰɔndeɾ puɾuʃɔʈike ʃɾef,dʰakka meɾe fele ditʃtʃʰe ɟɔle|0
+Data/wavs/bn_0960.wav|ʃekʰan tʰeke tʃikitʃɔk ʃastʰækɔrmideɾ poɾitʃɔɾæjo,niɾapɔd ʈʰãi pee ɡel,namɔpɔɾitʃɔjɔhin,ekɔɾɔtti meeʈi|0
+Data/wavs/bn_0961.wav|taɾ pɔɾe mowtʃak,ʃɔjɔŋʃiddʰa,ʃotɾu tʰeke,ʃɔtæɟit ɾaeɾ ʃakʰapɾɔʃakʰa|0
+Data/wavs/bn_0962.wav|ɡuɟɔɾaʈeɾ bʰuɟeɾ,ɟelɔpalano tolabaɟ,ɾaɟa ʃɔrmao,duʃɔptaho aɡe,ɟor.aʃãkojo dʰɔɾa pɔr.e|0
+Data/wavs/bn_0963.wav|uddeʃʃɔ,elakajo ʃanti ʃowhaɾdːɔ,o ʃampɾɔdaik ʃompɾitiɾ batabɔɾɔn ʃɾiʃʈi|0
+Data/wavs/bn_0964.wav|tilɔɟɔlaʈæŋɾajo mɔdeɾ bʰaʈi bʰaŋɔte hɔbe,mɾitɔdeɾ poɾibaɾɔke upɔdʒukto kʰkʰotipuɾɔn dite hɔbe|0
+Data/wavs/bn_0965.wav|biʃeʃɔto ekʈi dɾiʃʃɔ,dʒekʰane ʃɔkɔle,upur. hɔe,ɾaɟaɾanike ʃɾoddʰa ɟanatʃtʃʰe|0
+Data/wavs/bn_0966.wav|ʃastʰːɔ dɔfɔtɔɾeɾ boliʃʈʰɔ bʰumika,tɔtʰa ʃɔmɔjɔbiʃeʃe,kɔʈʰoɾ ʃastiɾɔo bæbɔstʰa ɾakʰa,bantʃʰɔnijo|0
+Data/wavs/bn_0967.wav|oi kɔnɔʃʈebɔl ʃekʰ,ʃohɔɾab,ɟor.aʃãko tʰanaɾ,o ʃi timiɾ bʰɔʈʈatʃaɾdʒeɾ ɡaɾɖɔ|0
+Data/wavs/bn_0968.wav|puɾbatʃɔleɾ pãtʃ bɔtʃʰɔɾeɾ ʃniɡdʰa,ba klaʃ oaneɾ ʃuɟɔnɔo,dowr.odowr.i kɔɾe klanto|0
+Data/wavs/bn_0969.wav|balmiki ammeɖɔkɔɾ, abaʃ dʒoɟɔnajo, bʰæmbe, oi ʃɔb flæʈ tojɾi hɔtʃtʃʰe|0
+Data/wavs/bn_0970.wav|kaɡɔɟɔkur.aniɾa mulɔto kaɡɔɟ ebɔŋ plaʃʈikɔbɔɾɟːɔ ʃɔŋɡɾɔho kɔɾe,ta bæbɔʃaideɾ bikɾi kɔɾen|0
+Data/wavs/bn_0971.wav|kaɾɔn tʃʰãʈai hɔoa tʃʰatɾɔ ʃubɾɔto naɡ,ɡuɾutɔɾ oʃustʰɔ hɔe pɔr.etʃʰen|0
+Data/wavs/bn_0972.wav|ɔbɔjɔbeɾ kɔlpɔnadipto ʃaɾɔlæmɔjo upɔstʰapɔnajo tʃetɔnaɾ,nibʰɾito ʃɔpnɔke,unmilito kɔɾɔte tʃeetʃʰen tini|0
+Data/wavs/bn_0973.wav|onupɔm kʰeɾ, miʃʈaɾ bokʃi tãɾ kɔtʰajo tʃehaɾajo poʃake, tʃoɾitɾɔ nirmane ɔnɔbɔdːɔ|0
+Data/wavs/bn_0974.wav|mulɔto biɟɔneʃ poʃʈɔ,o ʃpiɖ poʃʈɔke ana hɔetʃʰe,eɾ aotajo|0
+Data/wavs/bn_0975.wav|ʃeʈike dʒɔtnɔ kɔɾe ʃɔŋɾɔkʰkʰɔneɾ tʃeʃʈa kɔɾɔtʃʰe,oaiemɔeeɾ ʃifiɾ,bʰeŋtʰaɾ ʃakʰa|0
+Data/wavs/bn_0976.wav|udoɾ pinɖi budʰoɾ ɡʰar.e tʃapanoɾ,emɔn tʃɔmɔtkaɾ udahɔɾɔn,kalebʰɔdɾei mele|0
+Data/wavs/bn_0977.wav|ʃɔŋstʰajo bʰaŋɔtʃuɾ o ofiʃaɾ niɡɾɔheɾ obʰidʒoɡe,aɟ puliʃ,tʃʰɔjɔɟɔnɔke ɡɾefɔtaɾ kɔɾetʃʰe|0
+Data/wavs/bn_0978.wav|kintto kendɾe palabɔdɔleɾ pɔɾe,ei ɾaɟːe,bidʰanɔʃɔbʰajo,niɾɔŋkuʃ ʃɔŋkʰæɡɔɾiʃʈʰɔta pajo,enɔɖie|0
+Data/wavs/bn_0979.wav|ei pɾoʃɔŋɡe bam o kɔŋɡɾeʃ,netɾitbɔke,dʰojɾæʃil hɔoaɾ pɔɾamɔrʃɔ den,ɟdʒotibabu|0
+Data/wavs/bn_0980.wav|ʃojfuddin ʃoɟɔke,kɔŋɡɾeʃeɾ,ekʈi ʃoktiʃali ɡoʃʈʰi tʃajo na|0
+Data/wavs/bn_0981.wav|mɔnɔmohɔn tʃidɔmbɔɾɔm,mɔnʈek tɾoi,apatɔto,ei lɔkʰkʰːɔ ɔɾɟɔn kɔɾɔte ʃɔtʃeʃʈɔ|0
+Data/wavs/bn_0982.wav|taɾ aɡe,pak pɾeʃiɖenʈeɾ pɾinʃipal ʃekɾeʈaɾi,taɾik,aɟiɟ,aʃɔtʃʰen|0
+Data/wavs/bn_0983.wav|aɖɔbani ɟɔbab den,eʈa kloɟɔɖ tʃæpʈaɾ,ba,ɔdʰæjo ʃɔmapto|0
+Data/wavs/bn_0984.wav|ʃilpɔ biʃeʃɔɡɡõdeɾ mɔte,ei dui bʰaieɾ dɾiʃʈibʰɔŋɡiɾ paɾtʰɔkːɔ,akaʃ,ebɔŋ pataleɾ|0
+Data/wavs/bn_0985.wav|ɡɔto nɔbʰembɔɾ pɔɾæntɔo,upɔkulɔɾɔkʰkʰiɾ,ʃɔdɔɾ dɔfɔtɔɾ biʃɔjɔʈi nie tʃur.anto ʃiddʰanto nejɔni|0
+Data/wavs/bn_0986.wav|ɟʰaʈiɟʰɔrna ɟɔŋɡɔl,o,fulɔɟʰor. pahar.,pɾitʰɔk kɔɾetʃʰe dui ɾaɟdʒeɾ ʃimanake|0
+Data/wavs/bn_0987.wav|mul panɖulipiʈi bowddʰɔ ʃɔnnæʃi tʰumi ʃamɔbʰota,tibbɔti bʰaʃajo onubad kɔɾen|0
+Data/wavs/bn_0988.wav|poʃupalɔn keleŋkaɾiɾ ʃɔmɔe,tini ɡoɖɖajo ʈɾeɟaɾi ofiʃaɾeɾ daitbe tʃʰilen|0
+Data/wavs/bn_0989.wav|imfɔl ʈokiɟ,abaɾ ʃɔfɔl bæbɔʃaɾ aʃajo,iŋɾaɟi tʃʰobi dekʰatʃtʃʰe|0
+Data/wavs/bn_0990.wav|tãdeɾ tɔtʰːɔ ʃɔŋɡɾɔheɾ,ei pɔddʰɔtike bɔla hɔjo,lænɖɔ,ʃkæn ʃiʃʈem|0
+Data/wavs/bn_0991.wav|aɟɔkeɾ ʃikʰkʰɔk,ɔpɔɾimito dane bæɾtʰɔ,aɟɔkeɾ tʃʰatɾɔ,okul pɾapti tʰeke bontʃito|0
+Data/wavs/bn_0992.wav|ʃastɾeɾ bani dʒekʰane duɾbodʰːɔ,ʃekʰane pɔtʰeɾ hodiʃ,nite hɔbe,itihaʃ tʰeke|0
+Data/wavs/bn_0993.wav|hæ,biplɔbeɾ aɡe bɔlɔʃebʰik paɾʈio tʃʰil,ɔʃɔŋkʰːɔ mitʃʰil,o dʰɔrmɔɡʰɔʈeɾ uddʒokta|0
+Data/wavs/bn_0994.wav|tini ʃastɾɔ ɡʰẽʈe pɾoman kɔɾetʃʰilen,ʃamiɾ,odʰikaɾ atʃʰe,stɾike mɾidumɔndɔ peʈanoɾ|0
+Data/wavs/bn_0995.wav|amɔɾa tahake kabːe stʰan diatʃʰi,ʃowndɔɾætɔttbe tahake ɔɡɾahhɔ koɾi nai|0
+Data/wavs/bn_0996.wav|aɾ bikendɾikɔɾɔn pɔddʰɔtiɾ,onibarɾɔ onuʃɔŋɡɔ,ʃikʰkʰakʰkʰetɾe beʃɔɾɔkaɾi pũɟiɾ binioɡ|0
+Data/wavs/bn_0997.wav|bɔɟɔbɔɟ tʃɔmpahaʈi tʃiŋr.ipota nuŋɡii,ei ɾaɟːe ʃɔbdɔbaɟiɾ pɾodʰan,utpadɔnɔstʰɔl|0
+Data/wavs/bn_0998.wav|ɔːtʰoco,ei onuʃɔɾɔn to dʰɔrmɔniɾɔpekʰkʰɔtaɾ,adʰunik bikʰkʰaɾ ʃohito ʃamɔnɟɔsæpurnɔ nɔjo|0
+Data/wavs/bn_0999.wav|nimnɔbitto elaka dbaɾɔkanɔɡɔɾeɾ,kɔla bai,ɡæʃ duɾɡʰɔʈɔnaɾ pɔɾe muk hɔe dʒan|0

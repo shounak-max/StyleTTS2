@@ -13,6 +13,7 @@ import torch.nn.functional as F
 from torch.nn.utils import weight_norm, remove_weight_norm, spectral_norm
 
 from Utils.ASR.models import ASRCNN
+from Utils.ASR.layers import LinearNorm
 from Utils.JDC.model import JDCNet
 
 from Modules.diffusion.sampler import KDiffusion, LogNormalDistribution
@@ -592,12 +593,10 @@ def load_F0_models(path):
     return F0_model
 
 def load_ASR_models(ASR_MODEL_PATH, ASR_MODEL_CONFIG):
-    # load ASR model
     def _load_config(path):
         with open(path) as f:
             config = yaml.safe_load(f)
-        model_config = config['model_params']
-        return model_config
+        return config['model_params']
 
     def _load_model(model_config, model_path):
         model = ASRCNN(**model_config)
@@ -607,8 +606,48 @@ def load_ASR_models(ASR_MODEL_PATH, ASR_MODEL_CONFIG):
 
     asr_model_config = _load_config(ASR_MODEL_CONFIG)
     asr_model = _load_model(asr_model_config, ASR_MODEL_PATH)
-    _ = asr_model.train()
+    
+    # Resize embedding layers dynamically to support Bengali n_token > English n_token
+    # Read the main config to get the target n_token
+    with open('Configs/config_bn.yml', 'r') as f:
+        main_config = yaml.safe_load(f)
+    target_n_token = main_config['model_params']['n_token']
+    
+    current_n_token = asr_model_config.get('n_token', 178)
+    
+    if target_n_token > current_n_token:
+        print(f"Resizing ASR model from {current_n_token} to {target_n_token} tokens...")
+        
+        # 1. Resize ASRS2S embedding
+        old_emb = asr_model.asr_s2s.embedding
+        new_emb = torch.nn.Embedding(target_n_token, old_emb.embedding_dim)
+        with torch.no_grad():
+            new_emb.weight[:current_n_token] = old_emb.weight[:current_n_token]
+            # initialize the rest with same variance
+            val_range = math.sqrt(6 / asr_model.asr_s2s.decoder_rnn_dim)
+            new_emb.weight[current_n_token:].data.uniform_(-val_range, val_range)
+        asr_model.asr_s2s.embedding = new_emb
+        
+        # 2. Resize ASRS2S project_to_n_symbols
+        old_proj = asr_model.asr_s2s.project_to_n_symbols
+        new_proj = torch.nn.Linear(old_proj.in_features, target_n_token)
+        with torch.no_grad():
+            new_proj.weight[:current_n_token] = old_proj.weight[:current_n_token]
+            new_proj.bias[:current_n_token] = old_proj.bias[:current_n_token]
+        asr_model.asr_s2s.project_to_n_symbols = new_proj
+        
+        # 3. Resize ctc_linear
+        old_ctc = asr_model.ctc_linear[2]
+        new_ctc = LinearNorm(old_ctc.linear_layer.in_features, target_n_token)
+        with torch.no_grad():
+            new_ctc.linear_layer.weight[:current_n_token] = old_ctc.linear_layer.weight[:current_n_token]
+            new_ctc.linear_layer.bias[:current_n_token] = old_ctc.linear_layer.bias[:current_n_token]
+        asr_model.ctc_linear[2] = new_ctc
+        
+        asr_model.n_token = target_n_token
+        asr_model.asr_s2s.n_token = target_n_token
 
+    _ = asr_model.train()
     return asr_model
 
 def build_model(args, text_aligner, pitch_extractor, bert):

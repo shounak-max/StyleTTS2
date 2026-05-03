@@ -2,6 +2,11 @@ import os
 import os.path as osp
 import re
 import sys
+
+# Prevent transformers from importing broken TensorFlow
+os.environ['USE_TF'] = '0'
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = '1'
 import yaml
 import shutil
 import numpy as np
@@ -180,7 +185,7 @@ def main(config_path):
         for i, batch in enumerate(train_dataloader):
             waves = batch[0]
             batch = [b.to(device) for b in batch[1:]]
-            texts, input_lengths, _, _, mels, mel_input_length, _ = batch
+            texts, input_lengths, _, _, mels, mel_input_length, _, _, _ = batch
             
             with torch.no_grad():
                 mask = length_to_mask(mel_input_length // (2 ** n_down)).to('cuda')
@@ -333,7 +338,7 @@ def main(config_path):
 
                 waves = batch[0]
                 batch = [b.to(device) for b in batch[1:]]
-                texts, input_lengths, _, _, mels, mel_input_length, _ = batch
+                texts, input_lengths, _, _, mels, mel_input_length, _, _, _ = batch
 
                 with torch.no_grad():
                     mask = length_to_mask(mel_input_length // (2 ** n_down)).to('cuda')
