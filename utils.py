@@ -1,6 +1,12 @@
-from monotonic_align import maximum_path
-from monotonic_align import mask_from_lens
-from monotonic_align.core import maximum_path_c
+try:
+    from monotonic_align import maximum_path
+    from monotonic_align import mask_from_lens
+    from monotonic_align.core import maximum_path_c
+except ImportError:
+    # Fallback for environments without C++ build tools (e.g., Windows)
+    from monotonic_align_stub import maximum_path_py as maximum_path
+    from monotonic_align_stub import mask_from_lens
+    from monotonic_align_stub import maximum_path_c
 import numpy as np
 import torch
 import copy

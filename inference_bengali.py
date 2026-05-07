@@ -33,7 +33,7 @@ if not os.path.exists(checkpoint_path):
     print("We will load the model with random weights just to verify the pipeline works.")
 else:
     print(f"Loading checkpoint {checkpoint_path}...")
-    checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
     model.load_state_dict(checkpoint['net'])
 
 model.eval()

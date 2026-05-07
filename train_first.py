@@ -205,7 +205,7 @@ def main(config_path):
             s2s_attn.masked_fill_(attn_mask, 0.0)
                         
             with torch.no_grad():
-                mask_ST = mask_from_lens(s2s_attn, input_lengths, mel_input_length // (2 ** n_down))
+                mask_ST = mask_from_lens(s2s_attn, torch.full((len(s2s_attn),), s2s_attn.shape[2], dtype=torch.long, device=s2s_attn.device), torch.full((len(s2s_attn),), s2s_attn.shape[1], dtype=torch.long, device=s2s_attn.device))
                 s2s_attn_mono = maximum_path(s2s_attn, mask_ST)
 
             # encode
