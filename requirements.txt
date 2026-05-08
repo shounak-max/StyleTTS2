@@ -14,4 +14,11 @@ einops-exts
 tqdm
 typing
 typing-extensions
-git+https://github.com/resemble-ai/monotonic_align.git
+# monotonic_align requires a C compiler to build.
+# On Linux/WSL2:  pip install git+https://github.com/resemble-ai/monotonic_align.git
+# On Windows:     use WSL2 (recommended) or skip — the Python fallback in utils.py will be used.
+# Without it, TMA training (after epoch 50) will be ~100x slower.
+phonemizer>=3.2
+pandas
+click
+tensorboard

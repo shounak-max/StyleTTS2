@@ -33,7 +33,7 @@ if not os.path.exists(checkpoint_path):
     print("We will load the model with random weights just to verify the pipeline works.")
 else:
     print(f"Loading checkpoint {checkpoint_path}...")
-    checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
     model.load_state_dict(checkpoint['net'])
 
 model.eval()
@@ -88,9 +88,25 @@ def generate_speech(text, output_path="output.wav"):
         en = model.text_encoder(tokens, input_lengths, text_mask)
         F0_pred, N_pred = model.predictor.F0Ntrain(p, s_predict)
         
+        # Length-regulate: expand text encoding by predicted durations
+        # Build hard alignment matrix from predicted durations
+        dur_rounded = d.squeeze().clamp(min=1).round().long()  # [T_phonemes]
+        mel_len_pred = int(dur_rounded.sum().item())
+        aln_trg = torch.zeros(dur_rounded.shape[0], mel_len_pred, device=device)
+        c_frame = 0
+        for t_idx in range(aln_trg.shape[0]):
+            dur_t = int(dur_rounded[t_idx].item())
+            aln_trg[t_idx, c_frame: c_frame + dur_t] = 1
+            c_frame += dur_t
+
+        # Expand text encoding to mel frame resolution via alignment
+        en_expanded = en @ aln_trg.unsqueeze(0)  # [1, hidden, mel_len_pred]
+        mel_mask_pred = length_to_mask(
+            torch.LongTensor([mel_len_pred]).to(device)
+        ).to(device)
+
         # Generate Audio
-        asr = en
-        out = model.decoder(asr, F0_pred, N_pred, mel_mask.unsqueeze(1).squeeze(2))
+        out = model.decoder(en_expanded, F0_pred, N_pred, mel_mask_pred.unsqueeze(1).squeeze(2))
         audio = out.squeeze().cpu().numpy()
         
     print(f"Saving to {output_path}...")

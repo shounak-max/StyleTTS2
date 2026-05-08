@@ -1,6 +1,15 @@
-from monotonic_align import maximum_path
-from monotonic_align import mask_from_lens
-from monotonic_align.core import maximum_path_c
+try:
+    from monotonic_align import maximum_path
+    from monotonic_align import mask_from_lens
+    from monotonic_align.core import maximum_path_c
+    _USE_COMPILED_ALIGN = True
+except ImportError:
+    # Fallback for environments without C++ build tools (e.g., Windows without WSL)
+    from monotonic_align_stub import maximum_path_py as _maximum_path_py
+    from monotonic_align_stub import mask_from_lens
+    from monotonic_align_stub import maximum_path_c
+    _USE_COMPILED_ALIGN = False
+
 import numpy as np
 import torch
 import copy
@@ -11,20 +20,24 @@ import librosa
 import matplotlib.pyplot as plt
 from munch import Munch
 
-def maximum_path(neg_cent, mask):
-  """ Cython optimized version.
-  neg_cent: [b, t_t, t_s]
-  mask: [b, t_t, t_s]
-  """
-  device = neg_cent.device
-  dtype = neg_cent.dtype
-  neg_cent =  np.ascontiguousarray(neg_cent.data.cpu().numpy().astype(np.float32))
-  path =  np.ascontiguousarray(np.zeros(neg_cent.shape, dtype=np.int32))
+if not _USE_COMPILED_ALIGN:
+    # Pure-Python fallback wrapper (slow — only used when C extension unavailable)
+    def maximum_path(neg_cent, mask):
+        """Python fallback for maximum_path. Install monotonic_align for speed."""
+        return _maximum_path_py(neg_cent, mask)
+else:
+    # Compiled C extension is available — wrap it in the standard interface
+    def maximum_path(neg_cent, mask):
+        """Cython/C optimized monotonic alignment path."""
+        device = neg_cent.device
+        dtype = neg_cent.dtype
+        neg_cent = np.ascontiguousarray(neg_cent.data.cpu().numpy().astype(np.float32))
+        path = np.ascontiguousarray(np.zeros(neg_cent.shape, dtype=np.int32))
+        t_t_max = np.ascontiguousarray(mask.sum(1)[:, 0].data.cpu().numpy().astype(np.int32))
+        t_s_max = np.ascontiguousarray(mask.sum(2)[:, 0].data.cpu().numpy().astype(np.int32))
+        maximum_path_c(path, neg_cent, t_t_max, t_s_max)
+        return torch.from_numpy(path).to(device=device, dtype=dtype)
 
-  t_t_max = np.ascontiguousarray(mask.sum(1)[:, 0].data.cpu().numpy().astype(np.int32))
-  t_s_max = np.ascontiguousarray(mask.sum(2)[:, 0].data.cpu().numpy().astype(np.int32))
-  maximum_path_c(path, neg_cent, t_t_max, t_s_max)
-  return torch.from_numpy(path).to(device=device, dtype=dtype)
 
 def get_data_path_list(train_path=None, val_path=None):
     if train_path is None:

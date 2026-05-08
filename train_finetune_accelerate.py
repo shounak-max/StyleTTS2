@@ -32,7 +32,7 @@ from optimizers import build_optimizer
 
 from accelerate import Accelerator
 
-accelerator = Accelerator()
+accelerator = Accelerator(mixed_precision='bf16')  # BF16 for RTX 4000 Ada
 
 # simple fix for dataparallel that allows access to class attributes
 class MyDataParallel(torch.nn.DataParallel):
@@ -54,6 +54,11 @@ logger.addHandler(handler)
 @click.command()
 @click.option('-p', '--config_path', default='Configs/config_ft.yml', type=str)
 def main(config_path):
+    torch.backends.cudnn.benchmark = True
+    torch.manual_seed(1337)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(1337)
+
     config = yaml.safe_load(open(config_path))
     
     log_dir = config['log_dir']
@@ -99,7 +104,7 @@ def main(config_path):
                                         OOD_data=OOD_data,
                                         min_length=min_length,
                                         batch_size=batch_size,
-                                        num_workers=2,
+                                        num_workers=4,
                                         dataset_config={},
                                         device=device)
 
@@ -243,9 +248,13 @@ def main(config_path):
                                 sig=slmadv_params.sig
                                )
 
-    model, optimizer, train_dataloader = accelerator.prepare(
-        model, optimizer, train_dataloader
-    )
+    # Prepare each model component individually (model is a Munch dict, not nn.Module)
+    for k in model:
+        model[k] = accelerator.prepare(model[k])
+    train_dataloader = accelerator.prepare(train_dataloader)
+    for k in optimizer.optimizers:
+        optimizer.optimizers[k] = accelerator.prepare(optimizer.optimizers[k])
+        optimizer.schedulers[k] = accelerator.prepare(optimizer.schedulers[k])
 
     for epoch in range(start_epoch, epochs):
         running_loss = 0

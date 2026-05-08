@@ -21,33 +21,9 @@ logger.setLevel(logging.DEBUG)
 import pandas as pd
 from transformers import AutoTokenizer
 
-_pad = "$"
-_punctuation = ';:,.!?¡¿—…"«»“” '
-# Bengali Unicode range (U+0980 to U+09FF) for Bengali script support
-_letters_bengali = ''.join([chr(c) for c in range(0x0980, 0x09FF + 1)])
-_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-_letters_ipa = "ɑɐɒæɓʙβɔɕçɗɖðʤəɘɚɛɜɝɞɟʄɡɠɢʛɦɧħɥʜɨɪʝɭɬɫɮʟɱɯɰŋɳɲɴøɵɸθœɶʘɹɺɾɻʀʁɽʂʃʈʧʉʊʋⱱʌɣɤʍχʎʏʑʐʒʔʡʕʢǀǁǂǃˈˌːˑʼʴʰʱʲʷˠˤ˞↓↑→↗↘'̩'ᵻ"
-# Add Combining Diacritical Marks block (U+0300 - U+036F) for nasalization and tones
-_letters_ipa += ''.join([chr(c) for c in range(0x0300, 0x036F + 1)])
-
-# Export all symbols:
-symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_bengali) + list(_letters_ipa)
-
-dicts = {}
-for i in range(len((symbols))):
-    dicts[symbols[i]] = i
-
-class TextCleaner:
-    def __init__(self, dummy=None):
-        self.word_index_dictionary = dicts
-    def __call__(self, text):
-        indexes = []
-        for char in text:
-            try:
-                indexes.append(self.word_index_dictionary[char])
-            except KeyError:
-                print(f"Unknown symbol found: {char.encode('unicode_escape')}")
-        return indexes
+# Import canonical symbol table from text_utils (single source of truth).
+# Do NOT redefine symbols/dicts/TextCleaner here -- edit text_utils.py instead.
+from text_utils import symbols, dicts, TextCleaner
 
 np.random.seed(1)
 random.seed(1)
@@ -125,7 +101,13 @@ class FilePathDataset(torch.utils.data.Dataset):
         
         wave, text_tensor, speaker_id, bert_tokens = self._load_tensor(data)
         
-        mel_tensor = preprocess(wave).squeeze()
+        # Use precomputed mel cache if available (see precompute_mels.py)
+        full_path = osp.join(self.root_path, path)
+        mel_cache = full_path.replace('.wav', '.mel.npy')
+        if osp.exists(mel_cache):
+            mel_tensor = torch.from_numpy(np.load(mel_cache)).float()
+        else:
+            mel_tensor = preprocess(wave).squeeze()
         
         acoustic_feature = mel_tensor.squeeze()
         length_feature = acoustic_feature.size(1)
@@ -193,7 +175,14 @@ class FilePathDataset(torch.utils.data.Dataset):
 
     def _load_data(self, data):
         wave, text_tensor, speaker_id, bert_tokens = self._load_tensor(data)
-        mel_tensor = preprocess(wave).squeeze()
+        
+        # Use precomputed mel cache if available
+        full_path = osp.join(self.root_path, data[0])
+        mel_cache = full_path.replace('.wav', '.mel.npy')
+        if osp.exists(mel_cache):
+            mel_tensor = torch.from_numpy(np.load(mel_cache)).float()
+        else:
+            mel_tensor = preprocess(wave).squeeze()
 
         mel_length = mel_tensor.size(1)
         if mel_length > self.max_mel_length:
